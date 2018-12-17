@@ -20,7 +20,6 @@ var connection = mysql.createConnection({
     if (err) throw err;
     console.log("connected as id " + connection.threadId + "\n");
     promptPlayersName();
-    
   });
 
 
@@ -61,6 +60,7 @@ function promptPlayersName(){
           insertPlayersToDB(inquirerResponse.player2);
           insertPlayersToDB(inquirerResponse.player3);
           insertPlayersToDB(inquirerResponse.player4);
+          playGame();
         });
 }
 
@@ -82,3 +82,42 @@ function insertPlayersToDB(playerInput)
     }
   );
 }
+
+function playGame(){
+  console.log("Selecting all players...\n");
+  connection.query("SELECT * FROM players", function(err, res) {
+    if (err) throw err;
+    // Log all results of the SELECT statement
+    console.log(res);
+    console.log(res.length);
+
+    for(var i = 0; i < res.length; i++)
+    {
+      console.log(res[i]["playerName"]+ " is rolling dice");
+      var dice = Math.floor(Math.random() * 6) + 2;
+      console.log(res[i]["playerName"]+ " gets number:"+dice);
+      updatePosition(res[i]["playerName"], dice);
+
+    }
+  });
+}
+
+function updatePosition(player, dice) {
+  console.log("Updating \n");
+  var query = connection.query(
+    "UPDATE players SET ? WHERE ?",
+    [
+      {
+        position: dice
+      },
+      {
+        playerName: player
+      }
+    ],
+    function(err, res) {
+      console.log(res.affectedRows + " players updated!\n");
+      // Call deleteProduct AFTER the UPDATE completes
+      //deleteProduct();
+    }
+  );
+  }

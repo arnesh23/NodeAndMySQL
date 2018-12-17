@@ -33,6 +33,7 @@ function createProduct() {
       console.log(res.affectedRows + " product inserted!\n");
       // Call updateProduct AFTER the INSERT completes
       updateProduct();
+    
     }
   );
 
