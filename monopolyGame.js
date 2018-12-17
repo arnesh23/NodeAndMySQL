@@ -20,11 +20,15 @@ var connection = mysql.createConnection({
     if (err) throw err;
     console.log("connected as id " + connection.threadId + "\n");
     promptPlayersName();
+    
   });
 
 
 // Print the Game's Name on the console.
 console.log("WELCOME TO MONOPOLY GAME BY ARNESH REGMI!!!!!")
+console.log("THIS GAME HAS FOUR PLAYERS ONLY!")
+
+var numOfPlayers = 4;
 
 // Prompt the players' name
 // Four players max
@@ -32,44 +36,49 @@ function promptPlayersName(){
     inquirer.prompt([
         {
           type: "input",
-          name: "playerOne",
+          name: "player1",
           message: "Enter player one name",
         },
         {
             type: "input",
-            name: "playerTwo",
+            name: "player2",
             message: "Enter player two name",
           },
           {
             type: "input",
-            name: "playerThree",
+            name: "player3",
             message: "Enter player three name",
           },
           {
             type: "input",
-            name: "playerFour",
+            name: "player4",
             message: "Enter player four name",
           },
       ])
-        .then(function (inquirerResponse) {
-          insertPlayersToDB(inquirerResponse.playerOne, inquirerResponse.playerTwo, inquirerResponse.playerThree, inquirerResponse.playerFour);
+        .then(function (inquirerResponse) { 
+          //Insert the Four players into the database
+          insertPlayersToDB(inquirerResponse.player1);
+          insertPlayersToDB(inquirerResponse.player2);
+          insertPlayersToDB(inquirerResponse.player3);
+          insertPlayersToDB(inquirerResponse.player4);
         });
 }
 
-
-// Add the users to the DATABASe
-function insertPlayersToDB(player1, player2, player3,player4)
+// Add the users to the DATABASE
+function insertPlayersToDB(playerInput)
 {
-    var query = connection.query("INSERT INTO players (playerName, bankBalance) VALUES ?",
-        (player1,1000),
-        (player2, 1000),
-        (player3, 1000),
-        (player4, 1000),
+  console.log("PLAYER CALLED:");
+  console.log(playerInput);
+  var query = connection.query(
+    "INSERT INTO players SET ?",
+    {
+      playerName: playerInput,
+      bankBalance: 1000,
+    },
     function(err, res) {
-      console.log(res.affectedRows + "items  inserted!\n");
+      console.log(res.affectedRows + " product inserted!\n");
       // Call updateProduct AFTER the INSERT completes
       //updateProduct();
-      console.log(res);
     }
   );
 }

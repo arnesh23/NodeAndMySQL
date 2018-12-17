@@ -1,21 +1,22 @@
-DROP DATABASE monopolyDB;
+DROP DATABASE IF EXISTS monopolyDB;
 
 CREATE DATABASE monopolyDB;
 
 USE monopolyDB;
 
 
-CREATE TABLE Property(
+CREATE TABLE property(
 ID INT NULL,
 propertyName VARCHAR(50),
 propertyCost DECIMAL(10,2),
 Rent DECIMAL(10,2)
 );
 
-CREATE TABLE PLAYERS(
+CREATE TABLE players(
 ID INT AUTO_INCREMENT,
 playerName VARCHAR(50),
-bankBalance DECIMAL(10,2)
+bankBalance DECIMAL(10,2),
+PRIMARY KEY (ID)
 );
 
 INSERT INTO Property(propertyName, propertyCost, Rent)
