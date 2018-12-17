@@ -84,22 +84,33 @@ function insertPlayersToDB(playerInput)
 }
 
 function playGame(){
+  var playersArray = [];
   console.log("Selecting all players...\n");
   connection.query("SELECT * FROM players", function(err, res) {
     if (err) throw err;
     // Log all results of the SELECT statement
-    console.log(res);
-    console.log(res.length);
+    console.log("THE PLAYERS ARE!!!!");
+    console.log(res[0]["playerName"]);
+    console.log(res[1]["playerName"]);
+    console.log(res[2]["playerName"]);
+    console.log(res[3]["playerName"]);
 
-    for(var i = 0; i < res.length; i++)
-    {
-      console.log(res[i]["playerName"]+ " is rolling dice");
-      var dice = Math.floor(Math.random() * 6) + 2;
-      console.log(res[i]["playerName"]+ " gets number:"+dice);
-      updatePosition(res[i]["playerName"], dice);
-
-    }
+    inquirer.prompt([
+      {
+        type: "checkbox",
+        name: "player",
+        message: "Pick a player",
+        choices: [res[0]["playerName"],res[1]["playerName"],res[2]["playerName"],res[3]["playerName"]]
+      },
+    ])
+      .then(function (inquirerResponse) { 
+        console.log(inquirerResponse.player +" is rolling a dice");
+        playersArray.push(inquirerResponse.player);
+        var dice = Math.floor(Math.random() * 8) + 2 
+        updatePosition(inquirerResponse.player, dice)
+    
   });
+});
 }
 
 function updatePosition(player, dice) {
@@ -117,7 +128,106 @@ function updatePosition(player, dice) {
     function(err, res) {
       console.log(res.affectedRows + " players updated!\n");
       // Call deleteProduct AFTER the UPDATE completes
+      promptPurchaseProperty(player, dice);
       //deleteProduct();
     }
   );
+  }
+
+  function promptPurchaseProperty(player, dice)
+  {
+    var playerId = "";
+    var query = connection.query(
+      "SELECT ID FROM Players WHERE ?",
+      {
+        playerName: player
+      },
+      function(err, res) {
+        //console.log(res.affectedRows + " product inserted!\n");
+        // Call updateProduct AFTER the INSERT completes
+        //updateProduct();
+        console.log(player + res[0]["ID"]);
+        playerId = res[0]["ID"];
+        
+      }
+    );
+
+    var query = connection.query(
+      "SELECT ID,propertyName,propertyCost,Rent FROM Property WHERE ?",
+      {
+        position: dice
+      },
+      function(err, res1) {
+        //console.log(res.affectedRows + " product inserted!\n");
+        // Call updateProduct AFTER the INSERT completes
+        //updateProduct();
+        console.log("hello");
+        console.log(res1);
+        console.log(res1[0]["ID"]);
+        if(res1[0]["ID"] === null){
+          console.log(res1[0]["propertyName"]+" is up for purchase for a cost of $" +res1[0]["propertyCost"]);
+          inquirer.prompt([
+            {
+              type: "checkbox",
+              name: "purchase",
+              message: "Would you like to purchase?",
+              choices: ["Yes", "No"]
+            },
+          ])
+            .then(function (inquirerResponse) { 
+              console.log(inquirerResponse.purchase[0]);
+              if(inquirerResponse.purchase[0] === "Yes"){
+              //update Property database with Player's ID
+              console.log("PLAYERID"+playerId);
+              console.log("position"+dice);
+              var query = connection.query(
+                "UPDATE property SET ? WHERE ?",
+                [
+                  {
+                    ID: playerId
+                  },
+                  {
+                    position: dice
+                  }
+                ],
+                function(err, res2) {
+                 console.log(res2);
+                }
+              );
+
+              //Deduct from player's bankBalance
+              console.log("playerId"+playerId);
+              var query = connection.query(
+                "SELECT bankBalance from players Where ? ",
+                  {
+                    ID: playerId
+                  },
+                function(err, res3) {
+                  console.log(res3);
+                 console.log(res3[0]["bankBalance"]);
+                 var query = connection.query(
+                  "UPDATE players SET ? WHERE ? ",
+                    [{
+                      bankBalance: res3[0]["bankBalance"]-res1[0]["propertyCost"]
+                    },
+                    {
+                      ID: playerId
+                    },
+                  ],
+                  function(err, res4) {
+                   console.log(res4);
+                  }
+                );
+                }
+              );
+
+              }
+              
+            });
+        }
+
+
+      }
+    );
+
   }
