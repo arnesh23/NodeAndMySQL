@@ -1,5 +1,6 @@
 var inquirer = require("inquirer");
 var mysql = require("mysql");
+var cTable = require("console.table");
 
 var connection = mysql.createConnection({
     host: "localhost",
@@ -26,6 +27,7 @@ var connection = mysql.createConnection({
 // Print the Game's Name on the console.
 console.log("WELCOME TO MONOPOLY GAME BY ARNESH REGMI!!!!!")
 console.log("THIS GAME HAS FOUR PLAYERS ONLY!")
+
 
 var numOfPlayers = 4;
 
@@ -67,7 +69,6 @@ function promptPlayersName(){
 // Add the users to the DATABASE
 function insertPlayersToDB(playerInput)
 {
-  console.log("PLAYER CALLED:");
   console.log(playerInput);
   var query = connection.query(
     "INSERT INTO players SET ?",
@@ -89,6 +90,8 @@ function playGame(){
   connection.query("SELECT * FROM players", function(err, res) {
     if (err) throw err;
     // Log all results of the SELECT statement
+    console.log("PLAYERS TABLE:")
+    console.table(res);
     console.log("THE PLAYERS ARE!!!!");
     console.log(res[0]["playerName"]);
     console.log(res[1]["playerName"]);
@@ -108,13 +111,13 @@ function playGame(){
         playersArray.push(inquirerResponse.player);
         var dice = Math.floor(Math.random() * 8) + 2 
         updatePosition(inquirerResponse.player, dice)
-    
+        
   });
 });
 }
 
 function updatePosition(player, dice) {
-  console.log("Updating \n");
+  //console.log("Updating \n");
   var query = connection.query(
     "UPDATE players SET ? WHERE ?",
     [
@@ -126,7 +129,7 @@ function updatePosition(player, dice) {
       }
     ],
     function(err, res) {
-      console.log(res.affectedRows + " players updated!\n");
+      //console.log(res.affectedRows + " players updated!\n");
       // Call deleteProduct AFTER the UPDATE completes
       promptPurchaseProperty(player, dice);
       //deleteProduct();
@@ -158,14 +161,13 @@ function updatePosition(player, dice) {
         position: dice
       },
       function(err, res1) {
+        //console.log("here");
         //console.log(res.affectedRows + " product inserted!\n");
         // Call updateProduct AFTER the INSERT completes
         //updateProduct();
-        console.log("hello");
-        console.log(res1);
-        console.log(res1[0]["ID"]);
+        //console.log(res1[0]["ID"]);
         if(res1[0]["ID"] === null){
-          console.log(res1[0]["propertyName"]+" is up for purchase for a cost of $" +res1[0]["propertyCost"]);
+          console.log(res1[0]["propertyName"]+" district in San Francisco is up for purchase for a cost of $" +res1[0]["propertyCost"]);
           inquirer.prompt([
             {
               type: "checkbox",
@@ -175,11 +177,11 @@ function updatePosition(player, dice) {
             },
           ])
             .then(function (inquirerResponse) { 
-              console.log(inquirerResponse.purchase[0]);
+              //console.log(inquirerResponse.purchase[0]);
               if(inquirerResponse.purchase[0] === "Yes"){
               //update Property database with Player's ID
-              console.log("PLAYERID"+playerId);
-              console.log("position"+dice);
+              //console.log("PLAYERID"+playerId);
+              //console.log("position"+dice);
               var query = connection.query(
                 "UPDATE property SET ? WHERE ?",
                 [
@@ -191,20 +193,20 @@ function updatePosition(player, dice) {
                   }
                 ],
                 function(err, res2) {
-                 console.log(res2);
+                // console.log(res2);
                 }
               );
 
               //Deduct from player's bankBalance
-              console.log("playerId"+playerId);
+              //console.log("playerId"+playerId);
               var query = connection.query(
                 "SELECT bankBalance from players Where ? ",
                   {
                     ID: playerId
                   },
                 function(err, res3) {
-                  console.log(res3);
-                 console.log(res3[0]["bankBalance"]);
+                 // console.log(res3);
+                // console.log(res3[0]["bankBalance"]);
                  var query = connection.query(
                   "UPDATE players SET ? WHERE ? ",
                     [{
@@ -215,19 +217,50 @@ function updatePosition(player, dice) {
                     },
                   ],
                   function(err, res4) {
-                   console.log(res4);
+                 //  console.log(res4);
+                  // console.table(res4);
+                //   console.table(res)
                   }
                 );
                 }
               );
 
-              }
-              
+              var query = connection.query(
+                "SELECT * from property",
+                function(err, res) {
+                  console.table(res);
+                });
+                playGame();
+              }   
             });
         }
 
+        else{
+          console.log(player+"landed in " +res1[0]["propertyName"]+" district which is already sold :((" + player +"needs to pay!!");
+          payPlayer(player,dice);
+          playGame();
 
-      }
+          //lookup who to pay
+          // pay!
+        }
+      } 
     );
-
   }
+
+  function payPlayer(player,dice)
+  {
+    var rent = 0;
+    console.log(dice);
+    var query = connection.query(
+      "SELECT rent from property Where ? ",
+        {
+          position: dice
+        },
+      function(err, res) {
+       var rent = res[0]["rent"];
+       console.log(rent);
+      }
+
+
+
+    )}

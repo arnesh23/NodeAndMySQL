@@ -29,5 +29,6 @@ VALUES(1,'NorthBeach', 100, 50),
               (5,'Mission', 500, 350),
 			  (6,'Portero Hill', 400, 300),
               (7,'Castro', 450,300),
-              (8,'Haigh Ashbury',400,300)
+              (8,'Haigh Ashbury',400,300),
+              (9,'Chinatown',500,200)
 
