@@ -85,7 +85,7 @@ function insertPlayersToDB(playerInput)
 }
 
 function playGame(){
-  var playersArray = [];
+  
   console.log("Selecting all players...\n");
   connection.query("SELECT * FROM players", function(err, res) {
     if (err) throw err;
@@ -172,7 +172,7 @@ function updatePosition(player, dice) {
             {
               type: "checkbox",
               name: "purchase",
-              message: "Would you like to purchase?",
+              message: player+"!!! would you like to purchase "+ res1[0]["propertyName"]+" disctrict of San Francisco?",
               choices: ["Yes", "No"]
             },
           ])
@@ -365,3 +365,12 @@ function updatePosition(player, dice) {
 
       
     )}
+
+    function printWinner(){
+
+      var query = connection.query("SELECT bankBalance FROM players ORDER BY bankBalance DESC", function(err,res){
+
+          console.log(res);
+          console.log("Winner"+res[0]["playerName"]);
+      }
+      )};
