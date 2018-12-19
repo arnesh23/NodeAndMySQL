@@ -4,7 +4,6 @@ CREATE DATABASE monopolyDB;
 
 USE monopolyDB;
 
-
 CREATE TABLE property(
 ID INT NULL,
 position INT default 0,

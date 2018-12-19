@@ -237,9 +237,32 @@ function updatePosition(player, dice) {
 
         else{
           console.log(player+"landed in " +res1[0]["propertyName"]+" district which is already sold :((" + player +"needs to pay!!");
-          payPlayer(player,dice);
-          playGame();
+         
+          console.log("PLAYERID:"+playerId);
+          console.log("POSiTION:"+dice);
+          var query = connection.query(
+            "SELECT playerName from players WHERE ?",
+                  {
+                    position: dice
+                  },
+            function(err, res) {
+           //  console.log(res4);
+            // console.table(res4);
+          //   console.table(res)
 
+          console.log(dice);
+          console.log(res)
+          var propertyOwner = res[0]["playerName"];
+          console.log(player + " needs to pay " + propertyOwner);
+
+          payPlayer(player,propertyOwner,dice);
+          
+          }
+            
+          );
+
+          
+          
           //lookup who to pay
           // pay!
         }
@@ -247,7 +270,7 @@ function updatePosition(player, dice) {
     );
   }
 
-  function payPlayer(player,dice)
+  function payPlayer(player,owner,dice)
   {
     var rent = 0;
     console.log(dice);
@@ -259,8 +282,86 @@ function updatePosition(player, dice) {
       function(err, res) {
        var rent = res[0]["rent"];
        console.log(rent);
+
+       //get player bankBalance
+       // subtract rent from player bankBalance
+       var query = connection.query(
+        "SELECT bankBalance from players WHERE ? ",
+          [
+          {
+            playerName: player
+          },
+        ],
+        function(err, res4) {
+       //  console.log(res4);
+        // console.table(res4);
+      //   console.table(res)
+      var playerBankBalance = res4[0]["bankBalance"];
+      playerBankBalance -= rent;
+      //Update
+      var query = connection.query(
+        "UPDATE players SET ? WHERE ?",
+        [
+          {
+            bankBalance: playerBankBalance
+          },
+          {
+            playerName: player
+          }
+        ],
+        function(err, res) {
+          //console.log(res.affectedRows + " players updated!\n");
+          // Call deleteProduct AFTER the UPDATE completes
+         
+          //deleteProduct();
+        }
+      );
+
+        }
+      );
+
+      var query = connection.query(
+        "SELECT bankBalance from players WHERE ? ",
+          [
+          {
+            playerName: owner
+          },
+        ],
+        function(err, res4) {
+       //  console.log(res4);
+        // console.table(res4);
+      //   console.table(res)
+      console.log(res4);
+      var ownerBankBalance = res4[0]["bankBalance"];
+      ownerBankBalance += rent;
+
+      var query = connection.query(
+        "UPDATE players SET ? WHERE ?",
+        [
+          {
+            bankBalance: ownerBankBalance
+          },
+          {
+            playerName: owner
+          }
+        ],
+        function(err, res) {
+          //console.log(res.affectedRows + " players updated!\n");
+          // Call deleteProduct AFTER the UPDATE completes
+          //playGame();
+          //deleteProduct();
+          playGame();
+        }
+      );
+    
+        }
+        );
+
+
+
+       //get owner bankBalance
+       //add rent to owner bankBalance
       }
 
-
-
+      
     )}
