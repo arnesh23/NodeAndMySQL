@@ -30,6 +30,8 @@ console.log("THIS GAME HAS FOUR PLAYERS ONLY!")
 
 
 var numOfPlayers = 4;
+var numOfDiceRoll = 0;
+var count = 0;
 
 // Prompt the players' name
 // Four players max
@@ -84,8 +86,18 @@ function insertPlayersToDB(playerInput)
   );
 }
 
+var playersArray = [];
+
 function playGame(){
-  
+
+  count++;
+
+  console.log("Count"+count);
+  if(count ===5){
+  console.log("We Have a Winner!");
+  printWinner();
+  }
+
   console.log("Selecting all players...\n");
   connection.query("SELECT * FROM players", function(err, res) {
     if (err) throw err;
@@ -111,8 +123,12 @@ function playGame(){
         playersArray.push(inquirerResponse.player);
         var dice = Math.floor(Math.random() * 8) + 2 
         updatePosition(inquirerResponse.player, dice)
-        
+        numOfDiceRoll++;
+        console.log("playersArray:"+playersArray.length);
   });
+
+    if(numOfDiceRoll === 4)
+       printWinner;
 });
 }
 
@@ -356,6 +372,7 @@ function updatePosition(player, dice) {
     
         }
         );
+        //printWinner();
 
 
 
@@ -368,9 +385,10 @@ function updatePosition(player, dice) {
 
     function printWinner(){
 
-      var query = connection.query("SELECT bankBalance FROM players ORDER BY bankBalance DESC", function(err,res){
+      var query = connection.query("SELECT playerName FROM players ORDER BY bankBalance DESC", function(err,res){
 
           console.log(res);
           console.log("Winner"+res[0]["playerName"]);
+          process.exit()
       }
       )};
